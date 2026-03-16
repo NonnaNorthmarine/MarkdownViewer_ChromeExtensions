@@ -134,7 +134,7 @@ pre, #md-editor {
   background-color: #f3f4f6;
 }
 
-#md-pdf-button, #md-download-button, #md-theme-toggle {
+#md-pdf-button, #md-html-button, #md-download-button, #md-theme-toggle {
   position: fixed;
   top: 15px;
   z-index: 10000;
@@ -160,11 +160,15 @@ pre, #md-editor {
   right: 120px;
 }
 
-#md-download-button {
+#md-html-button {
   right: 190px;
 }
 
-#md-toggle-button:hover, #md-pdf-button:hover, #md-download-button:hover, #md-theme-toggle:hover {
+#md-download-button {
+  right: 260px;
+}
+
+#md-toggle-button:hover, #md-pdf-button:hover, #md-html-button:hover, #md-download-button:hover, #md-theme-toggle:hover {
   background-color: #f3f4f6;
 }
 
@@ -227,6 +231,7 @@ body.dark-mode #md-preview-container table tr:nth-child(2n) {
 
 body.dark-mode #md-toggle-button,
 body.dark-mode #md-pdf-button,
+body.dark-mode #md-html-button,
 body.dark-mode #md-download-button,
 body.dark-mode #md-theme-toggle {
   background-color: #1a1b26;
@@ -236,6 +241,7 @@ body.dark-mode #md-theme-toggle {
 
 body.dark-mode #md-toggle-button:hover,
 body.dark-mode #md-pdf-button:hover,
+body.dark-mode #md-html-button:hover,
 body.dark-mode #md-download-button:hover,
 body.dark-mode #md-theme-toggle:hover {
   background-color: #414868;
@@ -251,6 +257,7 @@ body.dark-mode #md-pdf-button:disabled {
   /* 不要なUIを印刷プレビューから隠す */
   #md-toggle-button,
   #md-pdf-button,
+  #md-html-button,
   #md-download-button,
   #md-theme-toggle,
   #md-editor {

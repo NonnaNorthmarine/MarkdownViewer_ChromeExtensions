@@ -44,6 +44,12 @@ pdfBtn.id = "md-pdf-button";
 pdfBtn.innerText = "Print";
 document.body.appendChild(pdfBtn);
 
+// 2.5.5 HTMLボタンの作成
+const htmlBtn = document.createElement("button");
+htmlBtn.id = "md-html-button";
+htmlBtn.innerText = "HTML";
+document.body.appendChild(htmlBtn);
+
 // 2.6 Save(Download)ボタンの作成
 const downloadBtn = document.createElement("button");
 downloadBtn.id = "md-download-button";
@@ -92,7 +98,70 @@ pdfBtn.addEventListener("click", () => {
   document.title = originalTitle;
 });
 
-let fileHandle = null; // ファイルハンドルを保持する変数
+let fileHandle = null; // Markdown用ファイルハンドルを保持する変数
+let htmlFileHandle = null; // HTML用ファイルハンドルを保持する変数
+
+// HTMLボタンのイベント
+htmlBtn.addEventListener("click", () => {
+  let basePath = window.location.pathname.split("/").pop() || "document";
+  try {
+    basePath = decodeURIComponent(basePath);
+  } catch (e) {}
+
+  const rawFileName = document.title ? document.title : basePath;
+  const fileName = rawFileName.replace(/\.md$/i, "").replace(/\.markdown$/i, "") + ".html";
+
+  // プレビュー用にレンダリングされたHTMLを取得
+  const previewHtml = DOMPurify.sanitize(md.render(editorArea.value));
+  
+  // 完全なHTMLドキュメントとして組み立てる
+  const htmlContent = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>${rawFileName}</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 50px 60px;
+    }
+    a { color: #00aaff; text-decoration: none; }
+    h1, h2, h3 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+    pre { background-color: #f6f8fa; border: 1px solid #dfe1e4; padding: 16px; border-radius: 6px; overflow: auto; }
+    code { font-family: "Consolas", "Monaco", monospace; background-color: rgba(27,31,35,0.05); color: #e01e5a; padding: 0.2em 0.4em; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #dfe1e4; padding: 8px 12px; }
+    th { background-color: #f6f8fa; }
+    tr:nth-child(2n) { background-color: #f8f9fa; }
+  </style>
+</head>
+<body>
+${previewHtml}
+</body>
+</html>`;
+
+  // --- HTML出力時に関する注意点 ---
+  // Chromeのセキュリティ仕様により、File System Access API (showSaveFilePicker) では
+  // 「.html」など実行可能な形式のファイルを直接上書き保存処理することがブロックされます。
+  // そのため、0バイトの空ファイルになってしまう現象を防ぐべく、HTMLに関しては常に標準のダウンロード方式を使用します。
+  const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  const originalText = htmlBtn.innerText;
+  htmlBtn.innerText = "Saved!";
+  setTimeout(() => { htmlBtn.innerText = originalText; }, 2000);
+});
 
 // Save(Download)ボタンのイベント
 downloadBtn.addEventListener("click", async () => {
