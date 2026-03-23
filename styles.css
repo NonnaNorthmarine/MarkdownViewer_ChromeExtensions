@@ -50,7 +50,7 @@ pre, #md-editor {
 /* リンクの色：水色 */
 #md-preview-container a {
   color: #00aaff !important;
-  text-decoration: none;
+  text-decoration: underline;
   transition: color 0.8s ease;
 }
 
@@ -82,7 +82,7 @@ pre, #md-editor {
 #md-preview-container code {
   font-family: "Consolas", "Monaco", monospace;
   background-color: rgba(27, 31, 35, 0.05);
-  color: #e01e5a;
+  color: #107c10;
   padding: 0.2em 0.4em;
   border-radius: 3px;
   transition: background-color 0.8s ease, color 0.8s ease;
@@ -115,14 +115,14 @@ pre, #md-editor {
 
 /* イタリック（*） */
 #md-preview-container em {
-  color: #b8860b;
+  color: #da7226;
   font-style: italic;
   transition: color 0.8s ease;
 }
 
 /* 太字（**） */
 #md-preview-container strong {
-  color: #d32f2f;
+  color: #d9263c;
   font-weight: bold;
   transition: color 0.8s ease;
 }
@@ -243,8 +243,8 @@ body.dark-mode #md-preview-container pre {
 }
 
 body.dark-mode #md-preview-container code {
-  background-color: rgba(122, 162, 247, 0.15);
-  color: #bb9af7;
+  background-color: rgba(129, 199, 132, 0.15);
+  color: #81c784;
 }
 
 body.dark-mode #md-preview-container table th,
@@ -261,11 +261,11 @@ body.dark-mode #md-preview-container table tr:nth-child(2n) {
 }
 
 body.dark-mode #md-preview-container em {
-  color: #ffd54f;
+  color: #da7226;
 }
 
 body.dark-mode #md-preview-container strong {
-  color: #ef5350;
+  color: #d9263c;
 }
 
 body.dark-mode #md-preview-container blockquote {
@@ -351,9 +351,11 @@ body.dark-mode #md-pdf-button:disabled {
     color: #24292e !important;
   }
 
-  body.dark-mode #md-preview-container code {
-    background-color: rgba(27, 31, 35, 0.05) !important;
-    color: #e01e5a !important;
+  body.dark-mode #md-preview-container code,
+  #md-preview-container code {
+    background-color: transparent !important;
+    color: #006400 !important;
+    border: 1px solid #cccccc !important;
   }
 
   body.dark-mode #md-preview-container table th,
@@ -367,11 +369,11 @@ body.dark-mode #md-pdf-button:disabled {
   }
 
   body.dark-mode #md-preview-container em {
-    color: #b8860b !important;
+    color: #da7226 !important;
   }
 
   body.dark-mode #md-preview-container strong {
-    color: #d32f2f !important;
+    color: #d9263c !important;
   }
 
   body.dark-mode #md-preview-container blockquote {
