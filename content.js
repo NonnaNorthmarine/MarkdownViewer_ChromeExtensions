@@ -147,22 +147,22 @@ htmlBtn.addEventListener("click", () => {
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       line-height: 1.7;
-      color: #333;
+      color: #1a1a1a;
       max-width: 800px;
       margin: 0 auto;
       padding: 50px 60px;
     }
-    a { color: #00aaff; text-decoration: underline; }
-    h1, h2, h3 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+    a { color: #0000EE; text-decoration: underline; }
+    h1, h2, h3 { color: #333333; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
     pre { background-color: #f6f8fa; border: 1px solid #dfe1e4; padding: 16px; border-radius: 6px; overflow: auto; }
-    code { font-family: "Consolas", "Monaco", monospace; background-color: rgba(27,31,35,0.05); color: #107c10; padding: 0.2em 0.4em; border-radius: 3px; }
+    code { font-family: "Consolas", "Monaco", monospace; background-color: rgba(27,31,35,0.05); color: #0d6409; padding: 0.2em 0.4em; border-radius: 3px; }
     table { border-collapse: collapse; width: 100%; margin: 16px 0; display: block; overflow-x: auto; }
     th, td { border: 1px solid #dfe1e4; padding: 8px 12px; }
     th { background-color: #f6f8fa; }
     tr:nth-child(2n) { background-color: #f8f9fa; }
-    em { color: #da7226; font-style: italic; }
-    strong { color: #d9263c; font-weight: bold; }
-    blockquote { border-left: 4px solid #dfe1e4; margin: 0 0 16px 0; padding: 0 1em; color: #6a737d; }
+    em { color: #d67130; font-style: italic; }
+    strong { color: #d52040; font-weight: bold; }
+    blockquote { border-left: 4px solid #dfe1e4; margin: 0 0 16px 0; padding: 0 1em; color: #6b737d; }
     .md-indent-1 { margin-left: 2em !important; }
     .md-indent-2 { margin-left: 4em !important; }
     .md-indent-3 { margin-left: 6em !important; }
@@ -170,7 +170,7 @@ htmlBtn.addEventListener("click", () => {
     .md-indent-5 { margin-left: 10em !important; }
     .md-indent-6 { margin-left: 12em !important; }
     @media print {
-      code { background-color: transparent !important; color: #006400 !important; border: 1px solid #ccc !important; }
+      code { background-color: transparent !important; color: #0d6409 !important; border: 1px solid #ccc !important; }
     }
   </style>
 </head>

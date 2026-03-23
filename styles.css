@@ -4,7 +4,7 @@
 /* --- 1. 全体・Code View（元のテキスト）の修正 --- */
 body {
   background-color: #ffffff !important;
-  color: #000000 !important;
+  color: #1a1a1a !important;
   margin: 0;
   padding: 0;
   font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -17,7 +17,7 @@ pre, #md-editor {
   word-wrap: break-word;
   padding: 50px !important;
   margin: 0 !important;
-  color: #000000 !important;
+  color: #1a1a1a !important;
   font-family: "Noto Sans JP", "Consolas", "Monaco", monospace;
   background-color: #ffffff !important;
   transition: background-color 0.8s ease, color 0.8s ease;
@@ -40,16 +40,16 @@ pre, #md-editor {
   margin: 0 auto;
   padding: 50px 60px;
   background-color: #ffffff;
-  color: #333333;
+  color: #1a1a1a;
   line-height: 1.7;
   font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   min-height: 100vh;
   transition: background-color 0.8s ease, color 0.8s ease;
 }
 
-/* リンクの色：水色 */
+/* リンクの色 */
 #md-preview-container a {
-  color: #00aaff !important;
+  color: #0000EE !important;
   text-decoration: underline;
   transition: color 0.8s ease;
 }
@@ -62,7 +62,7 @@ pre, #md-editor {
 #md-preview-container h1,
 #md-preview-container h2,
 #md-preview-container h3 {
-  color: #1a1a1a;
+  color: #333333;
   font-weight: 700;
   border-bottom: 1px solid #eaecef;
   padding-bottom: 0.3em;
@@ -82,7 +82,7 @@ pre, #md-editor {
 #md-preview-container code {
   font-family: "Consolas", "Monaco", monospace;
   background-color: rgba(27, 31, 35, 0.05);
-  color: #107c10;
+  color: #0d6409;
   padding: 0.2em 0.4em;
   border-radius: 3px;
   transition: background-color 0.8s ease, color 0.8s ease;
@@ -115,14 +115,14 @@ pre, #md-editor {
 
 /* イタリック（*） */
 #md-preview-container em {
-  color: #da7226;
+  color: #d67130;
   font-style: italic;
   transition: color 0.8s ease;
 }
 
 /* 太字（**） */
 #md-preview-container strong {
-  color: #d9263c;
+  color: #d52040;
   font-weight: bold;
   transition: color 0.8s ease;
 }
@@ -132,7 +132,7 @@ pre, #md-editor {
   border-left: 4px solid #dfe1e4;
   margin: 0 0 16px 0;
   padding: 0 1em;
-  color: #6a737d;
+  color: #6b737d;
   transition: color 0.8s ease, border-left-color 0.8s ease;
 }
 
@@ -211,40 +211,40 @@ pre, #md-editor {
 
 /* --- 4. ダークモード (.dark-mode) スタイル --- */
 body.dark-mode {
-  background-color: #16161e !important;
-  color: #c0caf5 !important;
+  background-color: #2b2a2e !important;
+  color: #d6d3de !important;
 }
 
 body.dark-mode pre, body.dark-mode #md-editor {
-  background-color: #16161e !important;
-  color: #c0caf5 !important;
+  background-color: #2b2a2e !important;
+  color: #d6d3de !important;
 }
 
 body.dark-mode #md-preview-container {
-  background-color: #16161e !important;
-  color: #a9b1d6;
+  background-color: #2b2a2e !important;
+  color: #d6d3de;
 }
 
 body.dark-mode #md-preview-container h1,
 body.dark-mode #md-preview-container h2,
 body.dark-mode #md-preview-container h3 {
-  color: #c0caf5;
+  color: #d6d3de;
   border-bottom-color: #414868;
 }
 
 body.dark-mode #md-preview-container a {
-  color: #7aa2f7 !important;
+  color: #8ab8eb !important;
 }
 
 body.dark-mode #md-preview-container pre {
   background-color: #1a1b26 !important;
   border-color: #414868;
-  color: #a9b1d6 !important;
+  color: #d6d3de !important;
 }
 
 body.dark-mode #md-preview-container code {
-  background-color: rgba(129, 199, 132, 0.15);
-  color: #81c784;
+  background-color: rgba(128, 212, 127, 0.15);
+  color: #80d47f;
 }
 
 body.dark-mode #md-preview-container table th,
@@ -261,16 +261,16 @@ body.dark-mode #md-preview-container table tr:nth-child(2n) {
 }
 
 body.dark-mode #md-preview-container em {
-  color: #da7226;
+  color: #edb381;
 }
 
 body.dark-mode #md-preview-container strong {
-  color: #d9263c;
+  color: #dc6a76;
 }
 
 body.dark-mode #md-preview-container blockquote {
   border-left-color: #414868;
-  color: #a9b1d6;
+  color: #d6d3de;
 }
 
 body.dark-mode #md-toggle-button,
@@ -278,9 +278,9 @@ body.dark-mode #md-pdf-button,
 body.dark-mode #md-html-button,
 body.dark-mode #md-download-button,
 body.dark-mode #md-theme-toggle {
-  background-color: #1a1b26;
-  color: #a9b1d6;
-  border-color: #414868;
+  background-color: #38373b;
+  color: #d6d3de;
+  border-color: #4d4b52;
 }
 
 body.dark-mode #md-toggle-button:hover,
@@ -288,12 +288,12 @@ body.dark-mode #md-pdf-button:hover,
 body.dark-mode #md-html-button:hover,
 body.dark-mode #md-download-button:hover,
 body.dark-mode #md-theme-toggle:hover {
-  background-color: #414868;
+  background-color: #4d4b52;
 }
 
 body.dark-mode #md-pdf-button:disabled {
-  background-color: #292e42;
-  color: #565f89;
+  background-color: #2e2d31;
+  color: #75737b;
 }
 
 /* --- 5. 印刷用スタイル --- */
@@ -319,7 +319,7 @@ body.dark-mode #md-pdf-button:disabled {
     margin: 0 !important;
     padding: 0 !important;
     background-color: #ffffff !important;
-    color: #000000 !important;
+    color: #1a1a1a !important;
   }
 
   body.dark-mode #md-preview-container, #md-preview-container {
@@ -330,31 +330,31 @@ body.dark-mode #md-pdf-button:disabled {
     box-shadow: none !important;
     border: none !important;
     background-color: #ffffff !important;
-    color: #333333 !important;
+    color: #1a1a1a !important;
     min-height: auto !important;
   }
 
   body.dark-mode #md-preview-container h1,
   body.dark-mode #md-preview-container h2,
   body.dark-mode #md-preview-container h3 {
-    color: #1a1a1a !important;
+    color: #333333 !important;
     border-bottom-color: #eaecef !important;
   }
 
   body.dark-mode #md-preview-container a {
-    color: #00aaff !important;
+    color: #0000EE !important;
   }
 
   body.dark-mode #md-preview-container pre {
     background-color: #f6f8fa !important;
     border-color: #dfe1e4 !important;
-    color: #24292e !important;
+    color: #1a1a1a !important;
   }
 
   body.dark-mode #md-preview-container code,
   #md-preview-container code {
     background-color: transparent !important;
-    color: #006400 !important;
+    color: #0d6409 !important;
     border: 1px solid #cccccc !important;
   }
 
@@ -369,15 +369,15 @@ body.dark-mode #md-pdf-button:disabled {
   }
 
   body.dark-mode #md-preview-container em {
-    color: #da7226 !important;
+    color: #d67130 !important;
   }
 
   body.dark-mode #md-preview-container strong {
-    color: #d9263c !important;
+    color: #d52040 !important;
   }
 
   body.dark-mode #md-preview-container blockquote {
     border-left-color: #dfe1e4 !important;
-    color: #6a737d !important;
+    color: #6b737d !important;
   }
 }
