@@ -113,6 +113,37 @@ pre, #md-editor {
   background-color: #f8f9fa;
 }
 
+/* イタリック（*） */
+#md-preview-container em {
+  color: #b8860b;
+  font-style: italic;
+  transition: color 0.8s ease;
+}
+
+/* 太字（**） */
+#md-preview-container strong {
+  color: #d32f2f;
+  font-weight: bold;
+  transition: color 0.8s ease;
+}
+
+/* 引用（>） */
+#md-preview-container blockquote {
+  border-left: 4px solid #dfe1e4;
+  margin: 0 0 16px 0;
+  padding: 0 1em;
+  color: #6a737d;
+  transition: color 0.8s ease, border-left-color 0.8s ease;
+}
+
+/* インデントクラス（h3以降） */
+.md-indent-1 { margin-left: 2em !important; }
+.md-indent-2 { margin-left: 4em !important; }
+.md-indent-3 { margin-left: 6em !important; }
+.md-indent-4 { margin-left: 8em !important; }
+.md-indent-5 { margin-left: 10em !important; }
+.md-indent-6 { margin-left: 12em !important; }
+
 /* --- 3. 切り替えボタン --- */
 #md-toggle-button {
   position: fixed;
@@ -229,6 +260,19 @@ body.dark-mode #md-preview-container table tr:nth-child(2n) {
   background-color: #1a1b26;
 }
 
+body.dark-mode #md-preview-container em {
+  color: #ffd54f;
+}
+
+body.dark-mode #md-preview-container strong {
+  color: #ef5350;
+}
+
+body.dark-mode #md-preview-container blockquote {
+  border-left-color: #414868;
+  color: #a9b1d6;
+}
+
 body.dark-mode #md-toggle-button,
 body.dark-mode #md-pdf-button,
 body.dark-mode #md-html-button,
@@ -254,6 +298,12 @@ body.dark-mode #md-pdf-button:disabled {
 
 /* --- 5. 印刷用スタイル --- */
 @media print {
+  /* 印刷プレビューの空の2ページ目を防ぐ */
+  html, body {
+    height: auto !important;
+    min-height: auto !important;
+  }
+
   /* 不要なUIを印刷プレビューから隠す */
   #md-toggle-button,
   #md-pdf-button,
@@ -281,6 +331,7 @@ body.dark-mode #md-pdf-button:disabled {
     border: none !important;
     background-color: #ffffff !important;
     color: #333333 !important;
+    min-height: auto !important;
   }
 
   body.dark-mode #md-preview-container h1,
@@ -313,5 +364,18 @@ body.dark-mode #md-pdf-button:disabled {
   body.dark-mode #md-preview-container table th,
   body.dark-mode #md-preview-container table tr:nth-child(2n) {
     background-color: #f6f8fa !important;
+  }
+
+  body.dark-mode #md-preview-container em {
+    color: #b8860b !important;
+  }
+
+  body.dark-mode #md-preview-container strong {
+    color: #d32f2f !important;
+  }
+
+  body.dark-mode #md-preview-container blockquote {
+    border-left-color: #dfe1e4 !important;
+    color: #6a737d !important;
   }
 }

@@ -12,11 +12,34 @@ const markdownText = rawContent ? rawContent.innerText : "";
 // デフォルトでdark-modeをONにする
 document.body.classList.add("dark-mode");
 
+function renderMarkdown(text) {
+  const cleanHtml = DOMPurify.sanitize(md.render(text));
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = cleanHtml;
+  
+  let currentIndent = 0;
+  for (let el of tempDiv.children) {
+    const tag = el.tagName.toLowerCase();
+    if (tag.match(/^h[1-6]$/)) {
+      const level = parseInt(tag[1], 10);
+      if (level <= 2) {
+        currentIndent = 0;
+      } else {
+        currentIndent = level - 2;
+      }
+    }
+    if (currentIndent > 0) {
+      el.classList.add(`md-indent-${currentIndent}`);
+    }
+  }
+  return tempDiv.innerHTML;
+}
+
 // 1. プレビュー用コンテナの作成
 const previewContainer = document.createElement("div");
 previewContainer.id = "md-preview-container";
 // セキュリティ対策: DOMPurifyでHTMLをサニタイズ（無害化）してから挿入
-previewContainer.innerHTML = DOMPurify.sanitize(md.render(markdownText));
+previewContainer.innerHTML = renderMarkdown(markdownText);
 previewContainer.style.display = "block"; // 初期状態はプレビュー
 document.body.appendChild(previewContainer);
 
@@ -67,7 +90,7 @@ pdfBtn.addEventListener("click", () => {
   const isPreview = previewContainer.style.display === "block";
   if (!isPreview) {
     // もしCode画面だったら最新の内容でプレビューを更新してから印刷
-    previewContainer.innerHTML = DOMPurify.sanitize(md.render(editorArea.value));
+    previewContainer.innerHTML = renderMarkdown(editorArea.value);
     previewContainer.style.display = "block";
     editorArea.style.display = "none";
     toggleBtn.innerText = "Code";
@@ -112,7 +135,7 @@ htmlBtn.addEventListener("click", () => {
   const fileName = rawFileName.replace(/\.md$/i, "").replace(/\.markdown$/i, "") + ".html";
 
   // プレビュー用にレンダリングされたHTMLを取得
-  const previewHtml = DOMPurify.sanitize(md.render(editorArea.value));
+  const previewHtml = renderMarkdown(editorArea.value);
   
   // 完全なHTMLドキュメントとして組み立てる
   const htmlContent = `<!DOCTYPE html>
@@ -137,6 +160,15 @@ htmlBtn.addEventListener("click", () => {
     th, td { border: 1px solid #dfe1e4; padding: 8px 12px; }
     th { background-color: #f6f8fa; }
     tr:nth-child(2n) { background-color: #f8f9fa; }
+    em { color: #b8860b; font-style: italic; }
+    strong { color: #d32f2f; font-weight: bold; }
+    blockquote { border-left: 4px solid #dfe1e4; margin: 0 0 16px 0; padding: 0 1em; color: #6a737d; }
+    .md-indent-1 { margin-left: 2em !important; }
+    .md-indent-2 { margin-left: 4em !important; }
+    .md-indent-3 { margin-left: 6em !important; }
+    .md-indent-4 { margin-left: 8em !important; }
+    .md-indent-5 { margin-left: 10em !important; }
+    .md-indent-6 { margin-left: 12em !important; }
   </style>
 </head>
 <body>
@@ -237,7 +269,7 @@ toggleBtn.addEventListener("click", () => {
     toggleBtn.innerText = "Preview";
   } else {
     // Code画面からプレビュー画面へ（最新のテキストで再描画・サニタイズ）
-    previewContainer.innerHTML = DOMPurify.sanitize(md.render(editorArea.value));
+    previewContainer.innerHTML = renderMarkdown(editorArea.value);
     previewContainer.style.display = "block";
     editorArea.style.display = "none";
     toggleBtn.innerText = "Code";
