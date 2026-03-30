@@ -1,7 +1,30 @@
+// --- 拡張子判定 ---
+let extBasePath = window.location.pathname.split("/").pop() || "document";
+try { extBasePath = decodeURIComponent(extBasePath); } catch (e) {}
+const extRawFileName = document.title ? document.title : extBasePath;
+const isTxt = window.location.pathname.match(/\.txt$/i) !== null || extRawFileName.match(/\.txt$/i) !== null;
+
 // ライブラリの初期化 (CommonMark準拠モード)
 // breaks: true を指定して単一改行をプレビューに反映させ、
 // enable(["strikethrough", "table"]) で ~~取り消し線~~ とテーブルを有効にする
-const md = window.markdownit("commonmark", { breaks: true }).enable(["strikethrough", "table"]);
+const mdOpts = { breaks: true };
+if (isTxt) {
+  // .txtの場合はHTMLタグを文字列として表示（無効化）する
+  mdOpts.html = false;
+}
+const md = window.markdownit("commonmark", mdOpts).enable(["strikethrough", "table"]);
+
+// --- 追加: 行番号(Source Map)をHTMLに埋め込むプラグイン処理 ---
+md.core.ruler.push('source_map_inject', function(state) {
+  state.tokens.forEach(function(token) {
+    if (token.map && token.type !== 'inline') {
+      token.attrJoin('class', 'source-line');
+      // token.map[0] は0始まりの行数なので、+1して人間の行数と合わせる
+      token.attrSet('data-source-line', String(token.map[0] + 1));
+    }
+  });
+});
+
 
 // 元のテキスト（ChromeがMDを開いた時に生成するpreタグ）を取得
 const rawContent = document.querySelector("pre");
@@ -13,6 +36,31 @@ const markdownText = rawContent ? rawContent.innerText : "";
 document.body.classList.add("dark-mode");
 
 function renderMarkdown(text) {
+  // --- TXTファイルの場合: マークダウンとしての解釈を完全にオフにし、1行ずつdivに包んで平文表示 ---
+  if (isTxt) {
+    const lines = text.split('\n');
+    let html = '';
+    for (let i = 0; i < lines.length; i++) {
+      // HTMLタグをエスケープして無害化
+      let safeText = lines[i]
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+        
+      // 空行の高さを維持するため
+      if (safeText === "") {
+        safeText = "<br>";
+      }
+      
+      // 同期機能用に source-line を付与
+      html += `<div class="source-line" data-source-line="${i+1}" style="white-space: pre-wrap;">${safeText}</div>`;
+    }
+    return html;
+  }
+
+  // --- MDファイルの場合: 従来通りのMarkdownレンダリング ---
   const cleanHtml = DOMPurify.sanitize(md.render(text));
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = cleanHtml;
@@ -38,22 +86,65 @@ function renderMarkdown(text) {
 // 1. プレビュー用コンテナの作成
 const previewContainer = document.createElement("div");
 previewContainer.id = "md-preview-container";
-// セキュリティ対策: DOMPurifyでHTMLをサニタイズ（無害化）してから挿入
 previewContainer.innerHTML = renderMarkdown(markdownText);
-previewContainer.style.display = "block"; // 初期状態はプレビュー
 document.body.appendChild(previewContainer);
 
-// 元のテキストは初期状態で非表示に
+// エディターと行番号レイヤーを包むラッパーを生成
+const editorWrapper = document.createElement("div");
+editorWrapper.id = "md-editor-wrapper";
+editorWrapper.style.display = "none";
+document.body.appendChild(editorWrapper);
+
+// ★バグ修正：元々の生のテキスト（preタグ）を非表示にする
 if (rawContent) {
   rawContent.style.display = "none";
 }
 
-// 1.5 編集可能なテキストエリア (エディタ) の作成
+// 行番号を描画するための幽霊レイヤー（バックドロップ）
+const backdrop = document.createElement("div");
+backdrop.id = "md-line-backdrop";
+editorWrapper.appendChild(backdrop);
+
 const editorArea = document.createElement("textarea");
 editorArea.id = "md-editor";
 editorArea.value = markdownText;
-editorArea.style.display = "none"; // 初期状態はプレビューなので非表示
-document.body.appendChild(editorArea);
+editorArea.selectionStart = 0;
+editorArea.selectionEnd = 0;
+editorWrapper.appendChild(editorArea); // bodyではなくラッパーに入れる
+
+// バックドロップの更新処理（行番号の生成と折り返し同期）
+function updateBackdrop() {
+  const text = editorArea.value;
+  const lines = text.split('\n');
+  let html = '';
+  // HTMLタグ等が含まれても文字として解釈させるためエスケープ
+  for (let line of lines) {
+    let safe = line
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+    
+    // 行の高さを保つため、空行には<br>を挿入
+    if (safe === '') safe = '<br>';
+    
+    // cssカウンターを使って .line::before に番号を振る
+    html += `<div class="line">${safe}</div>`;
+  }
+  backdrop.innerHTML = html;
+}
+
+// 初期描画
+updateBackdrop();
+
+// 入力時にバックドロップを更新
+editorArea.addEventListener("input", updateBackdrop);
+
+// エディターのスクロール時にバックドロップもスクロールさせる（完全同期）
+editorArea.addEventListener("scroll", () => {
+  backdrop.scrollTop = editorArea.scrollTop;
+});
 
 // 2. 切り替えボタンの作成
 const toggleBtn = document.createElement("button");
@@ -67,10 +158,15 @@ pdfBtn.id = "md-pdf-button";
 pdfBtn.innerText = "Print";
 document.body.appendChild(pdfBtn);
 
-// 2.5.5 HTMLボタンの作成
+// 2.5.5 HTMLボタン（TXTの場合はMarkdownボタン）の作成
 const htmlBtn = document.createElement("button");
-htmlBtn.id = "md-html-button";
-htmlBtn.innerText = "HTML";
+if (isTxt) {
+  htmlBtn.id = "md-markdown-button";
+  htmlBtn.innerText = "Markdown";
+} else {
+  htmlBtn.id = "md-html-button";
+  htmlBtn.innerText = "HTML";
+}
 document.body.appendChild(htmlBtn);
 
 // 2.6 Save(Download)ボタンの作成
@@ -92,7 +188,7 @@ pdfBtn.addEventListener("click", () => {
     // もしCode画面だったら最新の内容でプレビューを更新してから印刷
     previewContainer.innerHTML = renderMarkdown(editorArea.value);
     previewContainer.style.display = "block";
-    editorArea.style.display = "none";
+    editorWrapper.style.display = "none";
     toggleBtn.innerText = "Code";
   }
 
@@ -124,7 +220,7 @@ pdfBtn.addEventListener("click", () => {
 let fileHandle = null; // Markdown用ファイルハンドルを保持する変数
 let htmlFileHandle = null; // HTML用ファイルハンドルを保持する変数
 
-// HTMLボタンのイベント
+// HTMLボタン（TXTの場合はMarkdownエクスポート）のイベント
 htmlBtn.addEventListener("click", () => {
   let basePath = window.location.pathname.split("/").pop() || "document";
   try {
@@ -132,6 +228,28 @@ htmlBtn.addEventListener("click", () => {
   } catch (e) {}
 
   const rawFileName = document.title ? document.title : basePath;
+
+  if (isTxt) {
+    // --- Markdown書き出し処理 (.txt -> .md) ---
+    const fileName = rawFileName.replace(/\.txt$/i, "") + ".md";
+    const currentText = editorArea.value;
+    const blob = new Blob([currentText], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    const originalText = htmlBtn.innerText;
+    htmlBtn.innerText = "Saved!";
+    setTimeout(() => { htmlBtn.innerText = originalText; }, 2000);
+    return; // ここで終了
+  }
+
+  // --- HTML書き出し処理 (.md -> .html) ---
   const fileName = rawFileName.replace(/\.md$/i, "").replace(/\.markdown$/i, "") + ".html";
 
   // プレビュー用にレンダリングされたHTMLを取得
@@ -206,8 +324,12 @@ downloadBtn.addEventListener("click", async () => {
   } catch (e) {}
 
   const rawFileName = document.title ? document.title : basePath;
-  const fileName =
-    rawFileName.replace(/\.md$/i, "").replace(/\.markdown$/i, "") + ".md";
+  let fileName = "";
+  if (isTxt) {
+    fileName = rawFileName.match(/\.txt$/i) ? rawFileName : rawFileName + ".txt";
+  } else {
+    fileName = rawFileName.replace(/\.md$/i, "").replace(/\.markdown$/i, "") + ".md";
+  }
 
   // 最新のテキスト内容を取得
   const currentText = editorArea.value;
@@ -216,12 +338,15 @@ downloadBtn.addEventListener("click", async () => {
   if ('showSaveFilePicker' in window) {
     try {
       if (!fileHandle) {
+        const typeDesc = isTxt ? 'Text File' : 'Markdown File';
+        const typeAccept = isTxt ? {'text/plain': ['.txt']} : {'text/markdown': ['.md', '.markdown', '.txt']};
+        
         // 初回はダイアログを出して保存先を指定させる
         fileHandle = await window.showSaveFilePicker({
           suggestedName: fileName,
           types: [{
-            description: 'Markdown File',
-            accept: {'text/markdown': ['.md', '.markdown', '.txt']},
+            description: typeDesc,
+            accept: typeAccept,
           }],
         });
       }
@@ -262,20 +387,109 @@ downloadBtn.addEventListener("click", async () => {
   URL.revokeObjectURL(url);
 });
 
-// 3. 切り替えイベント
-toggleBtn.addEventListener("click", () => {
-  const isPreview = previewContainer.style.display === "block";
-  if (isPreview) {
-    // プレビュー画面からCode画面へ（エディタを表示）
-    previewContainer.style.display = "none";
-    editorArea.style.display = "block";
-    toggleBtn.innerText = "Preview";
+// --- スクロール同期用の関数群 ---
+
+// エディターの現在のカーソル行（1始まり）を取得
+function getCursorLineFromEditor() {
+  const textBeforeCursor = editorArea.value.substring(0, editorArea.selectionStart);
+  return textBeforeCursor.split('\n').length;
+}
+
+// プレビュー画面から現在一番上に見えているタグの行数（1始まり）を取得
+function getTopVisibleLineFromPreview() {
+  const elements = previewContainer.querySelectorAll('.source-line');
+  for (let el of elements) {
+    const rect = el.getBoundingClientRect();
+    // ヘッダーやパディング（50px強）を考慮して、画面の表示領域内に少し入ってきた要素を対象とする
+    if (rect.bottom > 60) {
+      return parseInt(el.getAttribute('data-source-line'), 10);
+    }
+  }
+  return 1; // 見つからなかった場合は先頭へ
+}
+
+// プレビューの指定行へスクロール
+function scrollToLineInPreview(lineNumber) {
+  // 指定された行に最も近い要素を探す
+  let targetEl = null;
+  const elements = previewContainer.querySelectorAll('.source-line');
+  for (let el of elements) {
+    const elLine = parseInt(el.getAttribute('data-source-line'), 10);
+    if (elLine >= lineNumber) {
+      targetEl = el;
+      break; // 一番最初に見つけた「指定行以降の要素」をターゲットとする
+    }
+  }
+
+  if (targetEl) {
+    // コンテナのpaddingを考慮して少し上にオフセット
+    const y = targetEl.getBoundingClientRect().top + window.scrollY - 50;
+    window.scrollTo({ top: y });
   } else {
+    // 見つからなかった（ファイルの末尾など）場合は一番下へ
+    window.scrollTo({ top: document.body.scrollHeight });
+  }
+}
+
+// エディターの指定行へスクロール（およびカーソル移動）
+function scrollToLineInEditor(lineNumber) {
+  // 1. カーソル（キャレット）位置を指定行の先頭へ自動移動させる
+  const lines = editorArea.value.split('\n');
+  let charCount = 0;
+  for (let i = 0; i < lineNumber - 1 && i < lines.length; i++) {
+    charCount += lines[i].length + 1; // +1 は改行文字(\n)の分
+  }
+  // テキストエリアにフォーカスを与えずにカーソル位置だけ更新する
+  editorArea.selectionStart = charCount;
+  editorArea.selectionEnd = charCount;
+
+  // 2. 画面のスクロール位置を計算する
+  // styles.css に合わせた行の高さ（フォントサイズ16px, line-height: 1.7 -> 約27.2px）
+  const computedStyle = window.getComputedStyle(editorArea);
+  const lineHeightStr = computedStyle.lineHeight;
+  let lineHeight = 27.2; // デフォルト(16px * 1.7)
+  if (lineHeightStr && lineHeightStr !== 'normal') {
+    lineHeight = parseFloat(lineHeightStr);
+  }
+
+  // textareaの一番上のスクロール位置からの距離を計算
+  editorArea.scrollTop = (lineNumber - 1) * lineHeight;
+}
+
+let isPreviewMode = true; // 初回はプレビューモード
+
+// トグルボタンのイベント
+toggleBtn.addEventListener("click", () => {
+  if (isPreviewMode) {
+    // 【プレビュー → エディター】
+    const targetLine = getTopVisibleLineFromPreview(); // 画面上の現在の行を取得
+
+    previewContainer.style.display = "none";
+    editorWrapper.style.display = "block";
+    toggleBtn.innerText = "Preview";
+    
+    // 切り替え直後にスクロール位置を適用（display: blockによるDOMの更新と再計算を待つ）
+    setTimeout(() => {
+      scrollToLineInEditor(targetLine);
+    }, 0);
+
+    isPreviewMode = false;
+  } else {
+    // 【エディター → プレビュー】
+    const cursorLine = getCursorLineFromEditor(); // カーソル行を取得
+
     // Code画面からプレビュー画面へ（最新のテキストで再描画・サニタイズ）
     previewContainer.innerHTML = renderMarkdown(editorArea.value);
     previewContainer.style.display = "block";
-    editorArea.style.display = "none";
+    editorWrapper.style.display = "none";
     toggleBtn.innerText = "Code";
+
+    // 描画したのち、計算した行の位置まで画面全体をスクロールする
+    setTimeout(() => {
+      scrollToLineInPreview(cursorLine);
+    }, 0);
+
+    isPreviewMode = true;
   }
 });
 

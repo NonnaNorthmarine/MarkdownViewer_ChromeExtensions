@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Markdown Viewer",
-  "version": "4.5",
+  "version": "5.0",
   "description": "Markdownファイルを表示し、プレビューとエディターを切り替える拡張機能。",
   "icons": {
     "16": "icon16.png",
@@ -14,7 +14,9 @@
         "*://*/*.md",
         "file://*/*.md",
         "*://*/*.markdown",
-        "file://*/*.markdown"
+        "file://*/*.markdown",
+        "*://*/*.txt",
+        "file://*/*.txt"
       ],
       "js": ["purify.min.js", "markdown-it.min.js", "content.js"],
       "css": ["styles.css"]

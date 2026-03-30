@@ -1,6 +1,11 @@
 /* Google Fonts の読み込み（復活：window.print()ならWebフォントが正常に利用可能） */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+JP:wght@400;700&display=swap");
 
+/* --- 0. 全体の設定（スクロールバーの横揺れ防止） --- */
+html {
+  overflow-y: scroll; /* 常にスクロールバー領域を確保し、表示の切り替えによる要素の横揺れ（レイアウトシフト）を完全に防ぐ */
+}
+
 /* --- 1. 全体・Code View（元のテキスト）の修正 --- */
 body {
   background-color: #ffffff !important;
@@ -11,34 +16,93 @@ body {
   transition: background-color 0.8s ease, color 0.8s ease;
 }
 
-/* Chromeが生成するpreタグ（元のソースコード領域）と、新設したエディタ領域の調整 */
-pre, #md-editor {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  padding: 50px !important;
-  margin: 0 !important;
-  color: #1a1a1a !important;
-  font-family: "Noto Sans JP", "Consolas", "Monaco", monospace;
-  background-color: #ffffff !important;
-  transition: background-color 0.8s ease, color 0.8s ease;
+/* エディタと行番号全体のラッパー領域 */
+#md-editor-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 920px;
+  height: 100vh; /* absoluteな子要素に確実な高さを与えるため */
+  margin: 0 auto !important;
 }
 
-/* エディタ専用の追加スタイル */
-#md-editor {
-  width: 100%;
-  min-height: 100vh;
+/* Chromeが生成するpreタグと、エディタ関係の表示ベース統一 */
+pre, #md-line-backdrop, #md-editor {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  padding: 50px 60px !important;
+  padding-left: 90px !important; /* 行番号を入れるために左だけ広げる */
+  margin: 0 !important;
+  font-family: "Noto Sans JP", "Consolas", "Monaco", monospace;
+  font-size: 16px;
+  line-height: 1.7; /* プレビューに合わせて行間を固定 */
   box-sizing: border-box;
   border: none;
-  resize: none;
   outline: none;
+}
+
+/* スクロールバー幅による文字折り返しのズレを補正（Windows Chrome標準の17pxを相殺） */
+#md-line-backdrop, #md-editor {
+  padding-right: 43px !important; /* 60px - 17px(スクロールバー) = 右余白を少し削ることで本文の幅をPreviewと1pxの狂いなく一致させる */
+}
+
+/* 行番号を描画する裏レイヤー（バックドロップ）固有のスタイル */
+#md-line-backdrop {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: #ffffff !important;
+  color: transparent !important; /* 本文は完全に透明にする */
+  overflow-y: auto; /* textareaと全く同じ幅（スクロールバー領域分縮む）にするため必須 */
+  overflow-x: hidden;
+  z-index: 1;
+  counter-reset: line;
+  pointer-events: none; /* マウスイベントはすべてtextareaにすり抜けさせる */
+  transition: background-color 0.8s ease;
+}
+
+#md-line-backdrop .line {
+  position: relative;
+  min-height: 1.7em;
+}
+
+/* ここが行番号の実体 */
+#md-line-backdrop .line::before {
+  counter-increment: line;
+  content: counter(line);
+  position: absolute;
+  top: 2px; /* Noto Sans JPとConsolasのベースライン（文字の基準線）のズレを視覚的に揃えるため2px下げる */
+  left: -60px; /* パディングの中（行番号領域）に配置 */
+  width: 40px;
+  text-align: right;
+  color: #c9caca; /* 薄いグレーで見やすく */
   font-size: 14px;
+  font-family: "Consolas", "Monaco", monospace;
+  user-select: none;
+  transition: color 0.8s ease;
+}
+
+/* 表側の入力エリア（エディター）固有のスタイル */
+#md-editor {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: transparent !important; /* 背景を透明にしてバックドロップを見せる */
+  color: #1a1a1a !important;
+  z-index: 2; /* 手前に重ねる */
+  resize: none;
+  display: block;
+  overflow-y: auto;
+  transition: color 0.8s ease;
 }
 
 /* --- 2. プレビュー画面のデザイン --- */
 #md-preview-container {
-  max-width: 800px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 920px;
   margin: 0 auto;
   padding: 50px 60px;
+  padding-left: 90px; /* Code側の行番号余白（30px）に合わせて位置を完全固定 */
   background-color: #ffffff;
   color: #1a1a1a;
   line-height: 1.7;
@@ -159,13 +223,15 @@ pre, #md-editor {
   font-family: "Noto Sans", sans-serif;
   font-size: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 80px; /* 文字の長さでボタンの幅が変わらないように固定 */
+  text-align: center; /* 文字をボタンの中央に配置 */
 }
 
 #md-toggle-button:hover {
   background-color: #f3f4f6;
 }
 
-#md-pdf-button, #md-html-button, #md-download-button, #md-theme-toggle {
+#md-pdf-button, #md-html-button, #md-markdown-button, #md-download-button, #md-theme-toggle {
   position: fixed;
   top: 15px;
   z-index: 10000;
@@ -191,15 +257,15 @@ pre, #md-editor {
   right: 120px;
 }
 
-#md-html-button {
+#md-html-button, #md-markdown-button {
   right: 190px;
 }
 
 #md-download-button {
-  right: 260px;
+  right: 290px;
 }
 
-#md-toggle-button:hover, #md-pdf-button:hover, #md-html-button:hover, #md-download-button:hover, #md-theme-toggle:hover {
+#md-toggle-button:hover, #md-pdf-button:hover, #md-html-button:hover, #md-markdown-button:hover, #md-download-button:hover, #md-theme-toggle:hover {
   background-color: #f3f4f6;
 }
 
@@ -215,9 +281,17 @@ body.dark-mode {
   color: #d6d3de !important;
 }
 
-body.dark-mode pre, body.dark-mode #md-editor {
+body.dark-mode #md-line-backdrop {
   background-color: #2b2a2e !important;
+}
+
+body.dark-mode pre,
+body.dark-mode #md-editor {
   color: #d6d3de !important;
+}
+
+body.dark-mode #md-line-backdrop .line::before {
+  color: #555555; /* ダークモード用の控えめな行番号カラー */
 }
 
 body.dark-mode #md-preview-container {
@@ -276,6 +350,7 @@ body.dark-mode #md-preview-container blockquote {
 body.dark-mode #md-toggle-button,
 body.dark-mode #md-pdf-button,
 body.dark-mode #md-html-button,
+body.dark-mode #md-markdown-button,
 body.dark-mode #md-download-button,
 body.dark-mode #md-theme-toggle {
   background-color: #38373b;
@@ -286,6 +361,7 @@ body.dark-mode #md-theme-toggle {
 body.dark-mode #md-toggle-button:hover,
 body.dark-mode #md-pdf-button:hover,
 body.dark-mode #md-html-button:hover,
+body.dark-mode #md-markdown-button:hover,
 body.dark-mode #md-download-button:hover,
 body.dark-mode #md-theme-toggle:hover {
   background-color: #4d4b52;
@@ -308,6 +384,7 @@ body.dark-mode #md-pdf-button:disabled {
   #md-toggle-button,
   #md-pdf-button,
   #md-html-button,
+  #md-markdown-button,
   #md-download-button,
   #md-theme-toggle,
   #md-editor {
