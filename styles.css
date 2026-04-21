@@ -458,3 +458,55 @@ body.dark-mode #md-pdf-button:disabled {
     color: #6b737d !important;
   }
 }
+
+/* --- 6. フロントマター (YAML frontmatter) --- */
+#md-preview-container .frontmatter-container {
+  margin-bottom: 16px;
+}
+
+#md-preview-container .frontmatter-container summary {
+  cursor: pointer;
+  color: #6b737d;
+  font-size: 0.9em;
+  font-weight: bold;
+  outline: none;
+  user-select: none;
+  transition: color 0.8s ease;
+}
+
+#md-preview-container .frontmatter-container pre {
+  margin: 8px 0 0 0 !important;
+  padding: 12px 16px !important;
+  background-color: #fafbfc !important;
+  border: 1px solid #dfe1e4 !important;
+  border-radius: 6px !important;
+}
+
+#md-preview-container .frontmatter-container code,
+body.dark-mode #md-preview-container .frontmatter-container code {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  line-height: 1.4 !important;
+  display: block !important;
+}
+
+#md-preview-container .frontmatter-container code {
+  color: #24292e !important;
+}
+
+/* ダークモード対応 (画面表示のみ。印刷時はライトモードへ強制) */
+@media screen {
+  body.dark-mode #md-preview-container .frontmatter-container summary {
+    color: #a9b1d6;
+  }
+
+  body.dark-mode #md-preview-container .frontmatter-container pre {
+    background-color: #1a1b26 !important;
+    border-color: #414868 !important;
+  }
+
+  body.dark-mode #md-preview-container .frontmatter-container code {
+    color: #d6d3de !important;
+  }
+}

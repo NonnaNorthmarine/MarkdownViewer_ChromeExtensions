@@ -61,9 +61,39 @@ function renderMarkdown(text) {
   }
 
   // --- MDファイルの場合: 従来通りのMarkdownレンダリング ---
+  let frontmatterHtml = "";
+  const fmRegex = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
+  const match = text.match(fmRegex);
+
+  if (match) {
+    const fmRaw = match[0];
+    const fmContent = match[1];
+    
+    // Markdownの行番号(Source Map)のズレを防ぐため、フロントマター部分を同数の空行に置き換える
+    const lineCount = fmRaw.split('\n').length - 1; 
+    const filler = '\n'.repeat(lineCount);
+    text = text.replace(fmRegex, filler);
+    
+    // エスケープ処理
+    const safeContent = fmContent
+      .trim()
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    // フロントマター表示用HTML（折りたたみ可能）
+    frontmatterHtml = `
+<details class="frontmatter-container source-line" data-source-line="1">
+  <summary>Frontmatter</summary>
+  <pre><code>${safeContent}</code></pre>
+</details>
+`;
+  }
+
   const cleanHtml = DOMPurify.sanitize(md.render(text));
   const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = cleanHtml;
+  // DOMPurifyでサニタイズされた安全なHTMLの先頭に、エスケープ済みのフロントマターを追加
+  tempDiv.innerHTML = frontmatterHtml + cleanHtml;
   
   let currentIndent = 0;
   for (let el of tempDiv.children) {
