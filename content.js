@@ -25,6 +25,40 @@ md.core.ruler.push('source_map_inject', function(state) {
   });
 });
 
+// --- 追加: チェックボックス(Task lists)をサポートするプラグイン処理 ---
+md.core.ruler.push('task_lists', function(state) {
+  var tokens = state.tokens;
+  var isInsideList = false;
+  for (var i = 0; i < tokens.length; i++) {
+    if (tokens[i].type === 'list_item_open') isInsideList = true;
+    if (tokens[i].type === 'list_item_close') isInsideList = false;
+    
+    if (isInsideList && tokens[i].type === 'inline') {
+      var token = tokens[i];
+      var text = token.content;
+      if (text.startsWith('[ ] ') || text.startsWith('[x] ') || text.startsWith('[X] ')) {
+        var isChecked = text.toLowerCase().startsWith('[x] ');
+        
+        token.content = text.substring(4);
+        if (token.children && token.children.length > 0 && token.children[0].type === 'text') {
+            token.children[0].content = token.children[0].content.substring(4);
+        }
+        
+        var checkbox = new state.Token('html_inline', '', 0);
+        checkbox.content = '<input type="checkbox" class="task-list-item-checkbox" disabled ' + (isChecked ? 'checked ' : '') + '>';
+        token.children.unshift(checkbox);
+        
+        for (var j = i - 1; j >= 0; j--) {
+          if (tokens[j].type === 'list_item_open') {
+            tokens[j].attrJoin('class', 'task-list-item');
+            break;
+          }
+        }
+      }
+    }
+  }
+});
+
 
 // 元のテキスト（ChromeがMDを開いた時に生成するpreタグ）を取得
 const rawContent = document.querySelector("pre");
@@ -90,7 +124,7 @@ function renderMarkdown(text) {
 `;
   }
 
-  const cleanHtml = DOMPurify.sanitize(md.render(text));
+  const cleanHtml = DOMPurify.sanitize(md.render(text), { ADD_TAGS: ['input'], ADD_ATTR: ['type', 'checked', 'disabled', 'class'] });
   const tempDiv = document.createElement("div");
   // DOMPurifyでサニタイズされた安全なHTMLの先頭に、エスケープ済みのフロントマターを追加
   tempDiv.innerHTML = frontmatterHtml + cleanHtml;
@@ -317,8 +351,12 @@ htmlBtn.addEventListener("click", () => {
     .md-indent-4 { margin-left: 8em !important; }
     .md-indent-5 { margin-left: 10em !important; }
     .md-indent-6 { margin-left: 12em !important; }
+    .task-list-item { list-style-type: none; }
+    .task-list-item-checkbox { appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border: 1px solid #333333; background-color: #ffffff; border-radius: 3px; margin: 0 0.2em 0.25em -1.6em; vertical-align: middle; position: relative; cursor: default; }
+    .task-list-item-checkbox:checked::after { content: ""; position: absolute; left: 3.5px; top: 0.5px; width: 4px; height: 8px; border: solid #000000; border-width: 0 2px 2px 0; transform: rotate(45deg); }
     @media print {
       code { background-color: transparent !important; color: #0d6409 !important; border: 1px solid #ccc !important; }
+      .task-list-item-checkbox { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
   </style>
 </head>

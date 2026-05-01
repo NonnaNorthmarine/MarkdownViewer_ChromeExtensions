@@ -510,3 +510,65 @@ body.dark-mode #md-preview-container .frontmatter-container code {
     color: #d6d3de !important;
   }
 }
+
+/* --- 7. Task Lists (チェックボックス) --- */
+#md-preview-container .task-list-item {
+  list-style-type: none;
+}
+
+#md-preview-container .task-list-item-checkbox {
+  margin: 0 0.2em 0.25em -1.6em;
+  vertical-align: middle;
+  cursor: default;
+}
+
+body:not(.dark-mode) #md-preview-container .task-list-item-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #555555;
+  background-color: #ffffff;
+  border-radius: 3px;
+  position: relative;
+}
+
+body:not(.dark-mode) #md-preview-container .task-list-item-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 3.5px;
+  top: 0.5px;
+  width: 4px;
+  height: 8px;
+  border: solid #1a1a1a;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+@media print {
+  #md-preview-container .task-list-item-checkbox,
+  body.dark-mode #md-preview-container .task-list-item-checkbox {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 3px !important;
+    position: relative !important;
+    border: 1px solid #333333 !important;
+    background-color: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #md-preview-container .task-list-item-checkbox:checked::after,
+  body.dark-mode #md-preview-container .task-list-item-checkbox:checked::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 3.5px !important;
+    top: 0.5px !important;
+    width: 4px !important;
+    height: 8px !important;
+    border: solid #000000 !important;
+    border-width: 0 2px 2px 0 !important;
+    transform: rotate(45deg) !important;
+  }
+}
